@@ -1,0 +1,72 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url 'https://repo.spring.io/snapshot' }
+    }
+    dependencies {
+        classpath("org.springframework:springloaded:1.2.9.BUILD-SNAPSHOT")
+    }
+}
+plugins {
+    id 'org.springframework.boot' version '1.5.10.RELEASE'
+    id 'com.devsoap.plugin.vaadin' version '1.3.1'
+    id 'eclipse'
+    id 'groovy'
+   
+}
+
+ext {
+    ext {
+        groovyVersion = '2.4.13'
+        gradleWrapperVersion = '4.5.1'
+        vaadinVersion = '8.3.1'
+        vaadinSpringVersion = '3.0.0'
+        spockVersion = '1.1-groovy-2.4'
+    }
+    mainClassName = "com.iqmsoft.Application" 
+}
+
+
+repositories {
+    jcenter()
+    maven { url 'https://maven.vaadin.com/vaadin-addons' }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+compileGroovy {
+	groovyOptions.configurationScript = file("gradle/groovyOptions.groovy")
+}
+
+jar {
+    baseName = 'SpringBootGroovyVaadin'
+    version = null // no version in the filename
+    manifest {
+        attributes 'Main-Class': mainClassName // Allow to run with `java -jar app.jar`
+    }
+}
+
+bootRun.systemProperties = System.properties // pass sysprops down to bootRun, so we can add them in configs in intellij
+
+vaadin {
+	vaadin.version = vaadinVersion
+	vaadinCompile.widgetset 'app' // name of the widgetset (see @Widgetset in the UI)
+	vaadinCompile.outputDirectory = file('build/resources/main/')
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = gradleWrapperVersion
+}
+
+
+
+dependencies {
+    compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    // always exclude com.vaadin packages from deps
+    compile("com.vaadin:vaadin-spring-boot-starter:${vaadinSpringVersion}")
+    testCompile "org.spockframework:spock-core:${spockVersion}"
+    // vaadin addons are put automatically into the widgetset 
+    // compile('org.vaadin.addons:ckeditor-wrapper-for-vaadin:7.9.3') { exclude group:'com.vaadin' }
+}
